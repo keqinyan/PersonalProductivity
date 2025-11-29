@@ -7,15 +7,16 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#1f2937">
+  <meta name="theme-color" content="#fae8ff">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
   <style>
     :root {
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui;
       line-height: 1.5;
-      color: #e5e7eb;
-      background: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000000 100%);
+      color: #1f2937;
+      background: linear-gradient(135deg, #fdf4ff 0%, #fae8ff 30%, #e0f2fe 70%, #ecfeff 100%);
+      min-height: 100vh;
     }
     body {
       margin: 0;
@@ -71,12 +72,13 @@
       margin-left: 4px;
     }
     .card {
-      background: rgba(15, 23, 42, 0.95);
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
       border-radius: 14px;
       padding: 10px 12px;
       margin-bottom: 10px;
-      border: 1px solid rgba(55, 65, 81, 0.8);
-      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(147, 51, 234, 0.2);
+      box-shadow: 0 4px 15px rgba(147, 51, 234, 0.1);
     }
     .tag {
       display: inline-block;
@@ -85,8 +87,8 @@
       border-radius: 999px;
       margin-right: 4px;
       margin-bottom: 4px;
-      background: rgba(31, 41, 55, 0.85);
-      color: #e5e7eb;
+      background: linear-gradient(135deg, #a855f7, #6366f1);
+      color: #fff;
     }
     label {
       display: flex;
@@ -105,23 +107,23 @@
       width: 100%;
       min-height: 60px;
       border-radius: 10px;
-      border: 1px solid #4b5563;
+      border: 1px solid #e9d5ff;
       padding: 6px 8px;
       font-size: 13px;
       resize: vertical;
       box-sizing: border-box;
-      background: rgba(15, 23, 42, 0.9);
-      color: #e5e7eb;
+      background: rgba(255, 255, 255, 0.9);
+      color: #1f2937;
     }
     textarea:focus,
     input:focus {
       outline: none;
-      border-color: #38bdf8;
-      box-shadow: 0 0 0 1px #38bdf822;
+      border-color: #a855f7;
+      box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.2);
     }
     .small {
       font-size: 11px;
-      color: #9ca3af;
+      color: #6b7280;
       margin-top: 4px;
     }
     button {
@@ -138,15 +140,15 @@
       box-shadow: 0 8px 16px rgba(22, 163, 74, 0.5);
     }
     button.secondary {
-      background: #111827;
-      color: #e5e7eb;
+      background: #fff;
+      color: #6b7280;
       box-shadow: none;
-      border: 1px solid #4b5563;
+      border: 1px solid #e5e7eb;
     }
     button.ghost {
       background: transparent;
-      color: #e5e7eb;
-      border: 1px dashed #4b5563;
+      color: #7c3aed;
+      border: 1px dashed #c4b5fd;
       box-shadow: none;
     }
     button:disabled {
@@ -165,7 +167,7 @@
       width: 100%;
       height: 8px;
       border-radius: 999px;
-      background: rgba(15, 23, 42, 0.35);
+      background: rgba(255, 255, 255, 0.5);
       overflow: hidden;
       margin-top: 6px;
     }
@@ -179,8 +181,8 @@
       font-size: 11px;
       padding: 2px 7px;
       border-radius: 999px;
-      background: rgba(17,24,39,0.9);
-      color: #9ca3af;
+      background: rgba(147, 51, 234, 0.1);
+      color: #7c3aed;
     }
     .emoji-row {
       min-height: 24px;
@@ -202,8 +204,8 @@
     }
     .day-box {
       border-radius: 10px;
-      background: #020617;
-      border: 1px solid #4b5563;
+      background: rgba(255, 255, 255, 0.6);
+      border: 1px solid #e9d5ff;
       padding: 2px 1px;
       min-height: 32px;
       display: flex;
@@ -214,7 +216,8 @@
     }
     .day-box.win {
       border-color: #22c55e;
-      box-shadow: 0 0 10px rgba(34,197,94,0.6);
+      background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(16,185,129,0.2));
+      box-shadow: 0 0 10px rgba(34,197,94,0.3);
     }
     .day-emoji-line {
       font-size: 14px;
@@ -222,19 +225,68 @@
     }
     .lottery-box {
       border-radius: 12px;
-      background: radial-gradient(circle at top, #22c55e22, #020617 65%);
-      border: 1px solid #4b5563;
+      background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(250,204,21,0.1));
+      border: 1px solid rgba(34,197,94,0.3);
       padding: 10px;
     }
     .lottery-result {
       font-size: 14px;
       margin-top: 6px;
-      color: #e5e7eb;
+      color: #374151;
     }
     .lottery-highlight {
       font-size: 16px;
       margin-top: 4px;
-      color: #facc15;
+      color: #d97706;
+      font-weight: bold;
+    }
+    /* Treasure chest animation */
+    .chest-container {
+      text-align: center;
+      margin: 16px 0;
+    }
+    .treasure-chest {
+      font-size: 60px;
+      display: inline-block;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .treasure-chest:hover {
+      transform: scale(1.1);
+    }
+    .treasure-chest.shaking {
+      animation: shake 0.3s ease infinite;
+    }
+    .treasure-chest.opening {
+      animation: openChest 0.5s ease forwards;
+    }
+    @keyframes shake {
+      0%, 100% { transform: rotate(-5deg) scale(1.1); }
+      50% { transform: rotate(5deg) scale(1.1); }
+    }
+    @keyframes openChest {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.3); }
+      100% { transform: scale(1) rotate(10deg); }
+    }
+    .confetti {
+      position: fixed;
+      font-size: 24px;
+      pointer-events: none;
+      animation: confettiFall 3s ease-out forwards;
+      z-index: 1000;
+    }
+    @keyframes confettiFall {
+      0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+    .prize-reveal {
+      animation: prizeReveal 0.5s ease;
+    }
+    @keyframes prizeReveal {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); opacity: 1; }
     }
   </style>
 </head>
@@ -299,19 +351,19 @@
   </div>
 
   <div class="card">
-    <h2>2. 量化 / 股票（A 级支线｜本周为准备周）</h2>
-    <span class="tag">准备周</span>
+    <h2>2. 量化 / 股票（A 级支线）</h2>
+    <span class="tag">支线任务</span>
     <p class="small">
-      本周是量化「准备周」，不计入通关硬性要求。<br />
-      你只需要：记想问大佬的问题、整理一点想法，就够了。
+      不计入主线通关硬性要求，但长期复利。<br />
+      随手记录想法、问题、市场观察即可。
     </p>
     <label>
       <input type="checkbox" data-key="quant_prepare" />
-      <span>记下本周想问大佬的 1–3 个问题 / 想搞懂的点。</span>
+      <span>记下想搞懂的 1–3 个问题 / 想研究的点。</span>
     </label>
     <label>
       <input type="checkbox" data-key="quant_note" />
-      <span>随手写一句对最近市场 / 策略的观察。（没有就空着，不会扣分）</span>
+      <span>随手写一句对最近市场 / 策略的观察。</span>
     </label>
     <h3>量化相关随手记录</h3>
     <textarea id="quant_plan" placeholder="例如：想问的问题、标的选择、风险偏好、策略方向……"></textarea>
@@ -375,8 +427,9 @@
       连续 7 天每天至少 1 个 emoji（streak ≥ 7）→ 解锁一次抽奖。<br />
       奖励池可随时修改，是你对自己的「小夸奖」和「能量补给」。
     </div>
-    <div style="margin-top:6px;">
-      <button id="lotteryBtn" class="secondary" disabled>宝箱未解锁</button>
+    <div class="chest-container">
+      <div class="treasure-chest" id="treasureChest" onclick="runLottery()" style="display:none;">🎁</div>
+      <div id="lockedChest" style="font-size:40px; opacity:0.4;">🔒</div>
     </div>
     <div class="lottery-result" id="lotteryResult"></div>
     <div class="lottery-highlight" id="lotteryPrize"></div>
@@ -412,7 +465,6 @@
     const todayEmojisEl = document.getElementById("todayEmojis");
     const weeklyGrid = document.getElementById("weeklyGrid");
     const weekSummaryText = document.getElementById("weekSummaryText");
-    const lotteryBtn = document.getElementById("lotteryBtn");
     const lotteryStatus = document.getElementById("lotteryStatus");
     const lotteryResult = document.getElementById("lotteryResult");
     const lotteryPrize = document.getElementById("lotteryPrize");
@@ -707,26 +759,44 @@
       const eligibleDraws = Math.floor(streak / 7);
       const remainingDraws = Math.max(0, eligibleDraws - totalDraws);
 
+      const treasureChest = document.getElementById("treasureChest");
+      const lockedChest = document.getElementById("lockedChest");
+
       if (!pool.length) {
         lotteryStatus.textContent = "奖池为空，请先添加奖励。";
-        lotteryBtn.disabled = true;
-        lotteryBtn.textContent = "宝箱未解锁";
+        treasureChest.style.display = "none";
+        lockedChest.style.display = "block";
         return;
       }
 
       if (remainingDraws > 0) {
-        lotteryStatus.textContent = `当前 streak：${streak} 天，可抽奖次数：${remainingDraws} 次`;
-        lotteryBtn.disabled = false;
-        lotteryBtn.textContent = "✨ 抽取本周奖励";
+        lotteryStatus.textContent = `🎉 streak ${streak} 天！可抽 ${remainingDraws} 次，点击宝箱！`;
+        treasureChest.style.display = "inline-block";
+        lockedChest.style.display = "none";
       } else {
         if (streak < 7) {
           const need = 7 - streak;
-          lotteryStatus.textContent = `当前 streak：${streak} 天，再坚持 ${need} 天就能解锁宝箱。`;
+          lotteryStatus.textContent = `streak ${streak} 天，再坚持 ${need} 天解锁宝箱`;
         } else {
-          lotteryStatus.textContent = `当前 streak：${streak} 天，本轮奖励已抽完，继续攒可以解锁更多次。`;
+          lotteryStatus.textContent = `streak ${streak} 天，本轮已抽完，继续攒！`;
         }
-        lotteryBtn.disabled = true;
-        lotteryBtn.textContent = "宝箱未解锁";
+        treasureChest.style.display = "none";
+        lockedChest.style.display = "block";
+      }
+    }
+
+    function createConfetti() {
+      const emojis = ['🎉', '✨', '🌟', '💫', '🎊', '⭐', '💖', '🌈'];
+      for (let i = 0; i < 25; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.className = 'confetti';
+          confetti.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+          confetti.style.left = Math.random() * 100 + 'vw';
+          confetti.style.top = '-30px';
+          document.body.appendChild(confetti);
+          setTimeout(() => confetti.remove(), 3000);
+        }, i * 80);
       }
     }
 
@@ -746,31 +816,40 @@
         return;
       }
 
-      lotteryBtn.disabled = true;
-      lotteryBtn.textContent = "抽奖中…";
-      lotteryResult.textContent = "宝箱正在摇晃中…";
+      const chest = document.getElementById("treasureChest");
+      chest.classList.add("shaking");
+      lotteryResult.textContent = "✨ 宝箱正在摇晃...";
       lotteryPrize.textContent = "";
 
-      let count = 0;
-      const duration = 1200;
-      const interval = 80;
-      const maxCount = Math.floor(duration / interval);
-      const timer = setInterval(() => {
-        const randomPrize = pool[Math.floor(Math.random() * pool.length)];
-        lotteryPrize.textContent = randomPrize;
-        count++;
-        if (count >= maxCount) {
-          clearInterval(timer);
+      // Shake for 1.5 seconds, then open
+      setTimeout(() => {
+        chest.classList.remove("shaking");
+        chest.classList.add("opening");
+        chest.textContent = "🎊";
+
+        // Show prize after opening animation
+        setTimeout(() => {
           const finalPrize = pool[Math.floor(Math.random() * pool.length)];
+          lotteryResult.textContent = "🎁 恭喜获得：";
           lotteryPrize.textContent = finalPrize;
-          lotteryResult.textContent = "本周奖励抽到：";
+          lotteryPrize.classList.add("prize-reveal");
+
+          createConfetti();
+
           meta = loadMeta();
           meta.lastPrizeResult = finalPrize;
           meta.totalDraws = (meta.totalDraws || 0) + 1;
           saveMeta(meta);
-          updateLotteryUI();
-        }
-      }, interval);
+
+          // Reset chest after animation
+          setTimeout(() => {
+            chest.classList.remove("opening");
+            chest.textContent = "🎁";
+            lotteryPrize.classList.remove("prize-reveal");
+            updateLotteryUI();
+          }, 2000);
+        }, 500);
+      }, 1500);
     }
 
     resetBtn.addEventListener("click", () => {
@@ -783,7 +862,6 @@
 
     addEmojiBtn.addEventListener("click", addEmoji);
     mainQuestBtn.addEventListener("click", markMainQuest);
-    lotteryBtn.addEventListener("click", runLottery);
 
     copyBtn.addEventListener("click", async () => {
       const data = loadToday();
@@ -803,9 +881,9 @@
         }｜总结：${data.research_summary ? "已写" : "未写"}`
       );
       lines.push("");
-      lines.push("二、量化（本周为准备周）");
+      lines.push("二、量化");
       lines.push(
-        `- 准备动作：问题整理 ${data.quant_prepare ? "✅" : "❌"}｜随手记录：${
+        `- 问题整理：${data.quant_prepare ? "✅" : "❌"}｜市场观察：${
           data.quant_note ? "✅" : "❌"
         }`
       );
