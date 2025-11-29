@@ -1,6 +1,0 @@
-# 忽略个人定制版（包含隐私内容）
-personal.html
-personal*.html
-
-# 本地数据备份
-*.backup.json

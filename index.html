@@ -1,1187 +1,838 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#1a1a2e">
-    <title>Battleboard 3.0</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --bg-primary: #1a1a2e;
-            --bg-secondary: #16213e;
-            --bg-card: #0f3460;
-            --accent-gold: #ffd700;
-            --accent-fire: #ff6b35;
-            --accent-green: #00d26a;
-            --accent-blue: #00b4d8;
-            --accent-purple: #9d4edd;
-            --text-primary: #ffffff;
-            --text-secondary: #a0a0a0;
-            --gradient-gold: linear-gradient(135deg, #ffd700, #ffaa00);
-            --gradient-fire: linear-gradient(135deg, #ff6b35, #f72585);
-            --gradient-green: linear-gradient(135deg, #00d26a, #00b894);
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-            padding: 16px;
-            padding-bottom: 100px;
-        }
-
-        /* HUD Section */
-        .hud {
-            background: var(--bg-secondary);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 16px;
-            border: 1px solid rgba(255,215,0,0.2);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        }
-
-        .hud-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .date-display {
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        .streak-badge {
-            background: var(--gradient-fire);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        .level-section {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-
-        .level-badge {
-            background: var(--gradient-gold);
-            color: #000;
-            padding: 8px 16px;
-            border-radius: 12px;
-            font-weight: bold;
-            font-size: 18px;
-        }
-
-        .xp-info {
-            flex: 1;
-        }
-
-        .xp-text {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-bottom: 4px;
-        }
-
-        .xp-bar {
-            height: 12px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 6px;
-            overflow: hidden;
-        }
-
-        .xp-fill {
-            height: 100%;
-            background: var(--gradient-gold);
-            border-radius: 6px;
-            transition: width 0.5s ease;
-        }
-
-        /* Task Sections */
-        .section {
-            background: var(--bg-secondary);
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 16px;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .section-title {
-            font-size: 16px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .section-title.main { color: var(--accent-fire); }
-        .section-title.side { color: var(--accent-blue); }
-        .section-title.base { color: var(--accent-green); }
-
-        /* Emoji Picker Area */
-        .emoji-input-area {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .emoji-input {
-            flex: 1;
-            background: var(--bg-card);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            padding: 12px;
-            color: var(--text-primary);
-            font-size: 24px;
-            text-align: center;
-        }
-
-        .emoji-input:focus {
-            outline: none;
-            border-color: var(--accent-gold);
-        }
-
-        .btn {
-            background: var(--gradient-green);
-            border: none;
-            border-radius: 12px;
-            padding: 12px 20px;
-            color: #000;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s, opacity 0.2s;
-        }
-
-        .btn:hover {
-            transform: scale(1.05);
-        }
-
-        .btn:active {
-            transform: scale(0.95);
-        }
-
-        .btn-main {
-            background: var(--gradient-fire);
-            width: 100%;
-            padding: 16px;
-            font-size: 18px;
-            margin-top: 8px;
-        }
-
-        .btn-side {
-            background: var(--gradient-gold);
-        }
-
-        /* Quick Emoji Buttons */
-        .quick-emojis {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .emoji-btn {
-            background: var(--bg-card);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px;
-            padding: 10px;
-            font-size: 20px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .emoji-btn:hover {
-            transform: scale(1.2);
-            border-color: var(--accent-gold);
-        }
-
-        /* Today's Emojis Display */
-        .today-emojis {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            min-height: 40px;
-            padding: 12px;
-            background: var(--bg-card);
-            border-radius: 12px;
-        }
-
-        .today-emoji {
-            font-size: 28px;
-            animation: popIn 0.3s ease;
-        }
-
-        @keyframes popIn {
-            0% { transform: scale(0); opacity: 0; }
-            50% { transform: scale(1.3); }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        /* Evening Questions */
-        .evening-questions {
-            margin-top: 12px;
-        }
-
-        .question-input {
-            width: 100%;
-            background: var(--bg-card);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px;
-            padding: 12px;
-            color: var(--text-primary);
-            font-size: 14px;
-            margin-bottom: 8px;
-            resize: none;
-        }
-
-        .question-input:focus {
-            outline: none;
-            border-color: var(--accent-fire);
-        }
-
-        .question-label {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-bottom: 4px;
-            display: block;
-        }
-
-        /* Weekly Calendar */
-        .calendar {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
-        }
-
-        .calendar-day {
-            background: var(--bg-card);
-            border-radius: 12px;
-            padding: 8px;
-            text-align: center;
-            min-height: 80px;
-        }
-
-        .calendar-day.today {
-            border: 2px solid var(--accent-gold);
-        }
-
-        .calendar-day.has-main {
-            background: linear-gradient(135deg, rgba(255,107,53,0.3), rgba(247,37,133,0.3));
-        }
-
-        .day-name {
-            font-size: 10px;
-            color: var(--text-secondary);
-            margin-bottom: 4px;
-        }
-
-        .day-date {
-            font-size: 12px;
-            margin-bottom: 8px;
-        }
-
-        .day-emojis {
-            font-size: 20px;
-            line-height: 1.4;
-        }
-
-        /* Lottery Section */
-        .lottery-section {
-            text-align: center;
-            padding: 24px;
-        }
-
-        .lottery-available {
-            display: none;
-        }
-
-        .lottery-available.show {
-            display: block;
-        }
-
-        .treasure-chest {
-            font-size: 80px;
-            animation: float 3s ease-in-out infinite;
-            cursor: pointer;
-            transition: transform 0.3s;
-        }
-
-        .treasure-chest:hover {
-            transform: scale(1.1);
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        .lottery-text {
-            margin-top: 12px;
-            color: var(--accent-gold);
-            font-weight: bold;
-        }
-
-        /* Lottery Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.9);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-content {
-            text-align: center;
-            padding: 40px;
-        }
-
-        .chest-opening {
-            font-size: 120px;
-            animation: shake 0.5s ease infinite;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: rotate(-5deg); }
-            50% { transform: rotate(5deg); }
-        }
-
-        .reward-reveal {
-            display: none;
-            animation: revealReward 1s ease;
-        }
-
-        .reward-reveal.show {
-            display: block;
-        }
-
-        @keyframes revealReward {
-            0% { transform: scale(0); opacity: 0; }
-            50% { transform: scale(1.5); }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        .reward-emoji {
-            font-size: 80px;
-            margin-bottom: 20px;
-        }
-
-        .reward-text {
-            font-size: 24px;
-            color: var(--accent-gold);
-            margin-bottom: 20px;
-        }
-
-        .confetti {
-            position: fixed;
-            font-size: 30px;
-            animation: fall 3s linear forwards;
-            pointer-events: none;
-        }
-
-        @keyframes fall {
-            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-        }
-
-        /* Rewards Pool Manager */
-        .rewards-list {
-            max-height: 200px;
-            overflow-y: auto;
-            margin: 12px 0;
-        }
-
-        .reward-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            background: var(--bg-card);
-            border-radius: 8px;
-            margin-bottom: 8px;
-        }
-
-        .reward-delete {
-            background: rgba(255,0,0,0.3);
-            border: none;
-            border-radius: 6px;
-            padding: 6px 12px;
-            color: white;
-            cursor: pointer;
-        }
-
-        .add-reward-form {
-            display: flex;
-            gap: 8px;
-        }
-
-        .add-reward-form input {
-            flex: 1;
-            background: var(--bg-card);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            padding: 10px;
-            color: white;
-        }
-
-        /* Settings Panel */
-        .settings-toggle {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: var(--gradient-gold);
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255,215,0,0.4);
-            z-index: 100;
-        }
-
-        .settings-panel {
-            display: none;
-            position: fixed;
-            bottom: 80px;
-            right: 20px;
-            background: var(--bg-secondary);
-            border-radius: 16px;
-            padding: 16px;
-            width: 280px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-            z-index: 100;
-        }
-
-        .settings-panel.show {
-            display: block;
-        }
-
-        .settings-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .settings-item:last-child {
-            border-bottom: none;
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 20px;
-            color: var(--text-secondary);
-        }
-
-        /* Streak Lost Animation */
-        .streak-lost {
-            animation: streakLost 0.5s ease;
-        }
-
-        @keyframes streakLost {
-            0%, 100% { background: var(--gradient-fire); }
-            50% { background: rgba(255,0,0,0.5); }
-        }
-
-        /* Toast Notification */
-        .toast {
-            position: fixed;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--bg-card);
-            padding: 12px 24px;
-            border-radius: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .toast.show {
-            opacity: 1;
-        }
-
-        /* Responsive */
-        @media (max-width: 400px) {
-            .calendar-day {
-                min-height: 70px;
-                padding: 6px;
-            }
-            .day-emojis {
-                font-size: 16px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Battleboard 3.0 🎮</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#1f2937">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    :root {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui;
+      line-height: 1.5;
+      color: #e5e7eb;
+      background: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000000 100%);
+    }
+    body {
+      margin: 0;
+      padding: 14px;
+      max-width: 780px;
+      margin-inline: auto;
+      box-sizing: border-box;
+    }
+    h1 {
+      font-size: 22px;
+      margin: 0 0 4px 0;
+    }
+    h2 {
+      font-size: 17px;
+      margin: 10px 0 6px;
+    }
+    h3 {
+      font-size: 14px;
+      margin: 8px 0 4px;
+    }
+    .top-card {
+      background: linear-gradient(135deg, #0ea5e9 0%, #4f46e5 40%, #a855f7 100%);
+      border-radius: 16px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      color: #f9fafb;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.5);
+    }
+    .flex-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .date {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+    .stat {
+      font-size: 13px;
+      margin-top: 4px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.32);
+      border: 1px solid rgba(15, 23, 42, 0.5);
+      margin-left: 4px;
+    }
+    .card {
+      background: rgba(15, 23, 42, 0.95);
+      border-radius: 14px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      border: 1px solid rgba(55, 65, 81, 0.8);
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.7);
+    }
+    .tag {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      margin-right: 4px;
+      margin-bottom: 4px;
+      background: rgba(31, 41, 55, 0.85);
+      color: #e5e7eb;
+    }
+    label {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      margin: 4px 0;
+    }
+    input[type="checkbox"] {
+      margin-top: 3px;
+      min-width: 18px;
+      min-height: 18px;
+      accent-color: #4f46e5;
+    }
+    textarea {
+      width: 100%;
+      min-height: 60px;
+      border-radius: 10px;
+      border: 1px solid #4b5563;
+      padding: 6px 8px;
+      font-size: 13px;
+      resize: vertical;
+      box-sizing: border-box;
+      background: rgba(15, 23, 42, 0.9);
+      color: #e5e7eb;
+    }
+    textarea:focus,
+    input:focus {
+      outline: none;
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 1px #38bdf822;
+    }
+    .small {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      background: #22c55e;
+      color: #022c22;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 8px 16px rgba(22, 163, 74, 0.5);
+    }
+    button.secondary {
+      background: #111827;
+      color: #e5e7eb;
+      box-shadow: none;
+      border: 1px solid #4b5563;
+    }
+    button.ghost {
+      background: transparent;
+      color: #e5e7eb;
+      border: 1px dashed #4b5563;
+      box-shadow: none;
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: default;
+      box-shadow: none;
+    }
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .xp-bar {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.35);
+      overflow: hidden;
+      margin-top: 6px;
+    }
+    .xp-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #22c55e, #eab308, #fb923c);
+      transition: width 0.25s ease-out;
+    }
+    .pill {
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(17,24,39,0.9);
+      color: #9ca3af;
+    }
+    .emoji-row {
+      min-height: 24px;
+      font-size: 20px;
+      margin-top: 4px;
+      word-wrap: break-word;
+    }
+    .weekly-grid {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .day-cell {
+      width: 38px;
+      text-align: center;
+      font-size: 10px;
+      color: #9ca3af;
+    }
+    .day-box {
+      border-radius: 10px;
+      background: #020617;
+      border: 1px solid #4b5563;
+      padding: 2px 1px;
+      min-height: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+    }
+    .day-box.win {
+      border-color: #22c55e;
+      box-shadow: 0 0 10px rgba(34,197,94,0.6);
+    }
+    .day-emoji-line {
+      font-size: 14px;
+      line-height: 1.1;
+    }
+    .lottery-box {
+      border-radius: 12px;
+      background: radial-gradient(circle at top, #22c55e22, #020617 65%);
+      border: 1px solid #4b5563;
+      padding: 10px;
+    }
+    .lottery-result {
+      font-size: 14px;
+      margin-top: 6px;
+      color: #e5e7eb;
+    }
+    .lottery-highlight {
+      font-size: 16px;
+      margin-top: 4px;
+      color: #facc15;
+    }
+  </style>
 </head>
 <body>
-    <!-- HUD -->
-    <div class="hud">
-        <div class="hud-top">
-            <div class="date-display" id="dateDisplay"></div>
-            <div class="streak-badge" id="streakBadge">
-                <span>🔥</span>
-                <span id="streakCount">0</span>
-                <span>天</span>
-            </div>
-        </div>
-        <div class="level-section">
-            <div class="level-badge">Lv.<span id="levelNum">1</span></div>
-            <div class="xp-info">
-                <div class="xp-text"><span id="currentXP">0</span> / <span id="nextLevelXP">100</span> XP</div>
-                <div class="xp-bar">
-                    <div class="xp-fill" id="xpFill" style="width: 0%"></div>
-                </div>
-            </div>
-        </div>
+  <div class="top-card">
+    <div class="flex-row">
+      <div>
+        <h1>Battleboard 3.0 🎮</h1>
+        <div class="date" id="today"></div>
+        <div class="stat" id="metaText"></div>
+      </div>
+      <div>
+        <div class="badge" id="streakBadge">连胜：0 天 🔥</div>
+        <div class="badge" id="levelBadge">Lv.1 · 0 XP</div>
+      </div>
     </div>
-
-    <!-- Lottery Section -->
-    <div class="section lottery-section">
-        <div class="lottery-available" id="lotteryAvailable">
-            <div class="treasure-chest" id="treasureChest" onclick="openLottery()">🎁</div>
-            <div class="lottery-text">🎉 连续7天！点击领取奖励！</div>
-        </div>
-        <div id="lotteryLocked">
-            <div style="font-size: 40px; opacity: 0.3;">🔒</div>
-            <div style="color: var(--text-secondary); margin-top: 8px;">
-                再坚持 <span id="daysToLottery">7</span> 天解锁抽奖
-            </div>
-        </div>
+    <div class="xp-bar">
+      <div class="xp-fill" id="xpFill" style="width: 0%"></div>
     </div>
-
-    <!-- Base Effort Section (Green) -->
-    <div class="section">
-        <div class="section-header">
-            <div class="section-title base">🌱 基础努力</div>
-        </div>
-        <div class="quick-emojis">
-            <span class="emoji-btn" onclick="addEmoji('🧘‍♀️', 'base')">🧘‍♀️</span>
-            <span class="emoji-btn" onclick="addEmoji('🏃‍♀️', 'base')">🏃‍♀️</span>
-            <span class="emoji-btn" onclick="addEmoji('🍎', 'base')">🍎</span>
-            <span class="emoji-btn" onclick="addEmoji('🌱', 'base')">🌱</span>
-            <span class="emoji-btn" onclick="addEmoji('😊', 'base')">😊</span>
-            <span class="emoji-btn" onclick="addEmoji('🧹', 'base')">🧹</span>
-            <span class="emoji-btn" onclick="addEmoji('🐱', 'base')">🐱</span>
-            <span class="emoji-btn" onclick="addEmoji('💤', 'base')">💤</span>
-            <span class="emoji-btn" onclick="addEmoji('✨', 'base')">✨</span>
-        </div>
-        <div class="emoji-input-area">
-            <input type="text" class="emoji-input" id="baseEmojiInput" placeholder="输入emoji...">
-            <button class="btn" onclick="addCustomEmoji('base')">+</button>
-        </div>
+    <div class="small">
+      规则：<br />
+      - 今天只要有 ≥1 个 emoji，连胜就继续。（你在认可自己，而不是审判自己）<br />
+      - 主线通关才加 XP，是成长的「稀有掉落」。
     </div>
+  </div>
 
-    <!-- Side Quest Section (Blue) -->
-    <div class="section">
-        <div class="section-header">
-            <div class="section-title side">📘 支线任务</div>
-        </div>
-        <div class="quick-emojis">
-            <span class="emoji-btn" onclick="addEmoji('📘', 'side')">📘</span>
-            <span class="emoji-btn" onclick="addEmoji('💡', 'side')">💡</span>
-            <span class="emoji-btn" onclick="addEmoji('🎯', 'side')">🎯</span>
-            <span class="emoji-btn" onclick="addEmoji('🔧', 'side')">🔧</span>
-            <span class="emoji-btn" onclick="addEmoji('📝', 'side')">📝</span>
-            <span class="emoji-btn" onclick="addEmoji('💻', 'side')">💻</span>
-            <span class="emoji-btn" onclick="addEmoji('🌟', 'side')">🌟</span>
-            <span class="emoji-btn" onclick="addEmoji('📊', 'side')">📊</span>
-        </div>
-        <div class="emoji-input-area">
-            <input type="text" class="emoji-input" id="sideEmojiInput" placeholder="输入emoji...">
-            <button class="btn btn-side" onclick="addCustomEmoji('side')">+</button>
-        </div>
+  <div class="card">
+    <div class="btn-row">
+      <span class="tag">今日控制台</span>
+      <div style="display:flex; gap:6px; flex-wrap:wrap;">
+        <button id="addEmojiBtn" class="ghost">+ 今日 emoji</button>
+        <button id="mainQuestBtn">🔥 主线通关</button>
+        <button id="resetToday" class="secondary">重置今天</button>
+      </div>
     </div>
-
-    <!-- Main Quest Section (Red) -->
-    <div class="section">
-        <div class="section-header">
-            <div class="section-title main">🔥 主线任务</div>
-        </div>
-
-        <div class="evening-questions">
-            <label class="question-label">今天最重要的事：</label>
-            <textarea class="question-input" id="q1" rows="2" placeholder="我今天做了什么重要的事..."></textarea>
-
-            <label class="question-label">今天学到的：</label>
-            <textarea class="question-input" id="q2" rows="2" placeholder="我今天学到了..."></textarea>
-
-            <label class="question-label">明天的计划：</label>
-            <textarea class="question-input" id="q3" rows="2" placeholder="明天我要..."></textarea>
-        </div>
-
-        <button class="btn btn-main" onclick="completeMainQuest()">🔥 主线通关 (+10 XP)</button>
+    <div class="small">
+      建议：任何你愿意认可的努力（跑实验 / 运动 / 健康饮食 / 情绪管理 / 收拾家 / 想法等），都可以加一个 emoji。<br />
+      每天至少加一个 emoji，就足够维持 streak。
     </div>
+    <h3>今天的 emoji</h3>
+    <div id="todayEmojis" class="emoji-row"></div>
+  </div>
 
-    <!-- Today's Emojis -->
-    <div class="section">
-        <div class="section-header">
-            <div class="section-title">📅 今日记录</div>
-            <span id="emojiCount">0 个</span>
-        </div>
-        <div class="today-emojis" id="todayEmojis">
-            <div class="empty-state">今天还没有记录~</div>
-        </div>
+  <div class="card">
+    <h2>1. 科研（S 级主线）</h2>
+    <span class="tag">主线任务</span>
+    <label>
+      <input type="checkbox" data-key="research_block1" />
+      <span>≥ 1 个深度工作块（60–90min）：推导 / 代码 / 数据分析（全程远离手机）。</span>
+    </label>
+    <label>
+      <input type="checkbox" data-key="research_block2" />
+      <span>第 2 个深度工作块（60–90min）。实验排满可用「实验+分析」替代。</span>
+    </label>
+    <label>
+      <input type="checkbox" data-key="research_summary" />
+      <span>写一句话：<em>「今天科研上，我真正推进的一步是什么？」</em></span>
+    </label>
+    <h3>今天科研 1–3 个关键任务</h3>
+    <textarea id="research_plan" placeholder="例如：1）整理上次实验数据；2）推完某个公式；3）写一页 note……"></textarea>
+    <p class="small">科研是你所有未来身份的底层算力训练场，不是为了导师，是为了未来的你。</p>
+  </div>
+
+  <div class="card">
+    <h2>2. 量化 / 股票（A 级支线｜本周为准备周）</h2>
+    <span class="tag">准备周</span>
+    <p class="small">
+      本周是量化「准备周」，不计入通关硬性要求。<br />
+      你只需要：记想问大佬的问题、整理一点想法，就够了。
+    </p>
+    <label>
+      <input type="checkbox" data-key="quant_prepare" />
+      <span>记下本周想问大佬的 1–3 个问题 / 想搞懂的点。</span>
+    </label>
+    <label>
+      <input type="checkbox" data-key="quant_note" />
+      <span>随手写一句对最近市场 / 策略的观察。（没有就空着，不会扣分）</span>
+    </label>
+    <h3>量化相关随手记录</h3>
+    <textarea id="quant_plan" placeholder="例如：想问的问题、标的选择、风险偏好、策略方向……"></textarea>
+  </div>
+
+  <div class="card">
+    <h2>3. 自媒体 / 输出（B 级支线）</h2>
+    <p class="small">
+      人设建议：<br />
+      <strong>「做量子 + 做量化 + 讲女性现实主义的 PhD 人生实验日志。」</strong><br />
+      今天没更不扣分，但不能用它逃避科研。
+    </p>
+    <label>
+      <input type="checkbox" data-key="media_brainstorm" />
+      <span>花 10–15min 想 1–3 个选题：科研翻车故事 / 女性生存细节 / 钱与风险的现实感悟。</span>
+    </label>
+    <label>
+      <input type="checkbox" data-key="media_create" />
+      <span>用 30–60min 输出一条内容（草稿 / 录制 / 初剪都算，不求完美）。</span>
+    </label>
+    <h3>今天的选题 / 想记录的点</h3>
+    <textarea id="media_ideas" placeholder="例如：今天实验翻车心得、某个女性生存话题、对钱 / 风险的一个洞察……"></textarea>
+  </div>
+
+  <div class="card">
+    <h2>4. 晚间 3 问（用 3 分钟收尾今天）</h2>
+    <label>
+      <input type="checkbox" data-key="review_q1" />
+      <span>今天三条线里，哪一条推进最大？写一句具体证据。</span>
+    </label>
+    <label>
+      <input type="checkbox" data-key="review_q2" />
+      <span>我今天最浪费时间的一件事是什么？明天准备怎么挡住它？</span>
+    </label>
+    <label>
+      <input type="checkbox" data-key="review_q3" />
+      <span>如果明天只能做好一件事，最值得的是哪一件？</span>
+    </label>
+    <textarea id="review_notes" placeholder="随便写几句，不用文艺，只要诚实。"></textarea>
+    <p class="small">你在评价的是「今天的行为」，不是你这个人。写两三句，就已经在升级。</p>
+  </div>
+
+  <div class="card">
+    <div class="flex-row">
+      <span class="tag">最近 7 天 emoji 日历</span>
+      <span class="pill" id="weekSummaryText">加载中...</span>
     </div>
+    <div class="weekly-grid" id="weeklyGrid"></div>
+    <p class="small">
+      每天展示优先级最高的 2 个 emoji（主线 / 支线 / 基础）。<br />
+      目标不是完美全绿，而是尽量减少「完全空白的一天」。
+    </p>
+  </div>
 
-    <!-- Weekly Calendar -->
-    <div class="section">
-        <div class="section-header">
-            <div class="section-title">📆 本周回顾</div>
-        </div>
-        <div class="calendar" id="weeklyCalendar"></div>
+  <div class="card lottery-box">
+    <div class="flex-row">
+      <span class="tag">周抽奖池 🎁</span>
+      <span class="pill" id="lotteryStatus">连续 7 天有 emoji 即可解锁宝箱</span>
     </div>
-
-    <!-- Rewards Pool -->
-    <div class="section">
-        <div class="section-header">
-            <div class="section-title">🎁 奖励池</div>
-        </div>
-        <div class="rewards-list" id="rewardsList"></div>
-        <div class="add-reward-form">
-            <input type="text" id="newRewardEmoji" placeholder="emoji" style="width: 60px; text-align: center;">
-            <input type="text" id="newRewardText" placeholder="奖励内容...">
-            <button class="btn" onclick="addReward()">添加</button>
-        </div>
+    <div class="small">
+      连续 7 天每天至少 1 个 emoji（streak ≥ 7）→ 解锁一次抽奖。<br />
+      奖励池可随时修改，是你对自己的「小夸奖」和「能量补给」。
     </div>
-
-    <!-- Lottery Modal -->
-    <div class="modal" id="lotteryModal">
-        <div class="modal-content">
-            <div class="chest-opening" id="chestOpening">🎁</div>
-            <div class="reward-reveal" id="rewardReveal">
-                <div class="reward-emoji" id="rewardEmoji"></div>
-                <div class="reward-text" id="rewardText"></div>
-                <button class="btn btn-main" onclick="closeLottery()">太棒了！我要去领奖励！</button>
-            </div>
-        </div>
+    <div style="margin-top:6px;">
+      <button id="lotteryBtn" class="secondary" disabled>宝箱未解锁</button>
     </div>
+    <div class="lottery-result" id="lotteryResult"></div>
+    <div class="lottery-highlight" id="lotteryPrize"></div>
+    <h3>奖池设置（每行一个心愿 / 奖励）</h3>
+    <textarea id="prizePoolInput" placeholder="每行一个奖励，例如：&#10;🍣 吃一顿大餐&#10;🛍 买一个小东西&#10;☕️ 去 café 坐一下午"></textarea>
+  </div>
 
-    <!-- Settings -->
-    <button class="settings-toggle" onclick="toggleSettings()">⚙️</button>
-    <div class="settings-panel" id="settingsPanel">
-        <div class="section-title" style="margin-bottom: 12px;">设置</div>
-        <div class="settings-item">
-            <span>重置今日数据</span>
-            <button class="btn" style="padding: 8px 12px; font-size: 12px;" onclick="resetToday()">重置</button>
-        </div>
-        <div class="settings-item">
-            <span>导出数据</span>
-            <button class="btn" style="padding: 8px 12px; font-size: 12px;" onclick="exportData()">导出</button>
-        </div>
-        <div class="settings-item">
-            <span>导入数据</span>
-            <input type="file" id="importFile" style="display:none" onchange="importData(event)">
-            <button class="btn" style="padding: 8px 12px; font-size: 12px;" onclick="document.getElementById('importFile').click()">导入</button>
-        </div>
+  <div class="card">
+    <div class="flex-row">
+      <span class="pill" id="progressText"></span>
+      <button id="copySummary">复制今天战报</button>
     </div>
+    <p class="small">
+      可把战报贴到你的《三线战斗日记》或 Notion 里，形成 90 天作战记录。
+    </p>
+  </div>
 
-    <!-- Toast -->
-    <div class="toast" id="toast"></div>
+  <script>
+    const todayKey = new Date().toISOString().slice(0, 10);
+    const STORAGE_KEY = "three_line_warboard_v3";
+    const META_KEY = "three_line_meta_v3";
 
-    <script>
-        // ========== DATA STRUCTURE ==========
-        const DEFAULT_REWARDS = [
-            { emoji: '🍣', text: '吃一顿大餐' },
-            { emoji: '🛍', text: '买一个小东西' },
-            { emoji: '☕️', text: '去café坐一下午' },
-            { emoji: '🧴', text: '买护肤品' },
-            { emoji: '🛁', text: '泡澡' },
-            { emoji: '💆‍♀️', text: '全身护理' },
-            { emoji: '🧋', text: '奶茶' },
-            { emoji: '🍰', text: '甜点奖励' }
+    const todayEl = document.getElementById("today");
+    const metaText = document.getElementById("metaText");
+    const streakBadge = document.getElementById("streakBadge");
+    const levelBadge = document.getElementById("levelBadge");
+    const xpFill = document.getElementById("xpFill");
+    const resetBtn = document.getElementById("resetToday");
+    const mainQuestBtn = document.getElementById("mainQuestBtn");
+    const addEmojiBtn = document.getElementById("addEmojiBtn");
+    const copyBtn = document.getElementById("copySummary");
+    const progressText = document.getElementById("progressText");
+    const todayEmojisEl = document.getElementById("todayEmojis");
+    const weeklyGrid = document.getElementById("weeklyGrid");
+    const weekSummaryText = document.getElementById("weekSummaryText");
+    const lotteryBtn = document.getElementById("lotteryBtn");
+    const lotteryStatus = document.getElementById("lotteryStatus");
+    const lotteryResult = document.getElementById("lotteryResult");
+    const lotteryPrize = document.getElementById("lotteryPrize");
+    const prizePoolInput = document.getElementById("prizePoolInput");
+
+    (function setDate() {
+      const d = new Date();
+      const week = ["日", "一", "二", "三", "四", "五", "六"][d.getDay()];
+      todayEl.textContent = `今天：${todayKey}（周${week}）`;
+    })();
+
+    function loadAll() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      } catch {
+        return {};
+      }
+    }
+    function saveAll(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+    function loadMeta() {
+      try {
+        return JSON.parse(
+          localStorage.getItem(META_KEY) ||
+            '{"xp":0,"streak":0,"lastWinDate":null,"lastEmojiDate":null,"totalDraws":0,"prizePool":[],"lastPrizeResult":null}'
+        );
+      } catch {
+        return {
+          xp: 0,
+          streak: 0,
+          lastWinDate: null,
+          lastEmojiDate: null,
+          totalDraws: 0,
+          prizePool: [],
+          lastPrizeResult: null,
+        };
+      }
+    }
+    function saveMeta(meta) {
+      localStorage.setItem(META_KEY, JSON.stringify(meta));
+    }
+    function loadToday() {
+      const all = loadAll();
+      return all[todayKey] || {};
+    }
+    function saveToday(partial) {
+      const all = loadAll();
+      all[todayKey] = { ...(all[todayKey] || {}), ...partial };
+      saveAll(all);
+      updateProgress();
+      updateTodayEmojis();
+      updateWeeklyView();
+    }
+
+    function ensureDefaultPrizePool(meta) {
+      if (!meta.prizePool || !Array.isArray(meta.prizePool) || meta.prizePool.length === 0) {
+        meta.prizePool = [
+          "🍣 吃一顿大餐",
+          "🛍 买一个小东西",
+          "☕️ 去 café 坐一下午",
+          "🧴 买护肤品",
+          "🛁 泡澡",
+          "💆‍♀️ 全身护理",
+          "🍰 吃一份喜欢的甜点",
+          "🧋 奶茶奖励",
+          "🎮 玩游戏 1 小时",
+          "📦 买购物车里的一个东西",
         ];
-
-        // ========== UTILITY FUNCTIONS ==========
-        function getToday() {
-            return new Date().toISOString().split('T')[0];
-        }
-
-        function getYesterday() {
-            const d = new Date();
-            d.setDate(d.getDate() - 1);
-            return d.toISOString().split('T')[0];
-        }
-
-        function getData() {
-            const data = localStorage.getItem('battleboard');
-            if (!data) {
-                return {
-                    streak: 0,
-                    xp: 0,
-                    level: 1,
-                    lastActiveDate: null,
-                    days: {},
-                    rewards: DEFAULT_REWARDS,
-                    lotteryClaimedWeek: null
-                };
-            }
-            return JSON.parse(data);
-        }
-
-        function saveData(data) {
-            localStorage.setItem('battleboard', JSON.stringify(data));
-        }
-
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 2000);
-        }
-
-        // ========== STREAK LOGIC ==========
-        function updateStreak() {
-            const data = getData();
-            const today = getToday();
-            const yesterday = getYesterday();
-
-            // Check if we need to update streak based on yesterday's activity
-            if (data.lastActiveDate === yesterday) {
-                // Continue streak
-            } else if (data.lastActiveDate !== today && data.lastActiveDate !== yesterday) {
-                // Streak broken - but only reset if we had emojis before
-                if (data.lastActiveDate) {
-                    data.streak = 0;
-                }
-            }
-
-            // If today has emojis and lastActiveDate isn't today, increment streak
-            const todayData = data.days[today];
-            if (todayData && todayData.emojis && todayData.emojis.length > 0) {
-                if (data.lastActiveDate !== today) {
-                    data.streak = data.streak + 1;
-                    data.lastActiveDate = today;
-                }
-            }
-
-            saveData(data);
-            renderHUD();
-        }
-
-        // ========== EMOJI FUNCTIONS ==========
-        function addEmoji(emoji, type) {
-            const data = getData();
-            const today = getToday();
-
-            if (!data.days[today]) {
-                data.days[today] = { emojis: [], mainComplete: false, questions: {} };
-            }
-
-            const priority = type === 'main' ? 3 : type === 'side' ? 2 : 1;
-            data.days[today].emojis.push({ emoji, type, priority, time: Date.now() });
-
-            saveData(data);
-            updateStreak();
-            renderTodayEmojis();
-            renderCalendar();
-
-            showToast(`${emoji} 已记录！`);
-        }
-
-        function addCustomEmoji(type) {
-            const input = document.getElementById(type + 'EmojiInput');
-            const emoji = input.value.trim();
-            if (emoji) {
-                addEmoji(emoji, type);
-                input.value = '';
-            }
-        }
-
-        // ========== MAIN QUEST ==========
-        function completeMainQuest() {
-            const data = getData();
-            const today = getToday();
-
-            if (!data.days[today]) {
-                data.days[today] = { emojis: [], mainComplete: false, questions: {} };
-            }
-
-            // Check if already completed today
-            if (data.days[today].mainComplete) {
-                showToast('今天已经通关过了！明天继续加油！');
-                return;
-            }
-
-            // Save questions
-            data.days[today].questions = {
-                q1: document.getElementById('q1').value,
-                q2: document.getElementById('q2').value,
-                q3: document.getElementById('q3').value
-            };
-
-            // Add main quest emoji and XP
-            addEmoji('🔥', 'main');
-            addEmoji('👑', 'main');
-
-            data.days[today].mainComplete = true;
-            data.xp += 10;
-
-            // Level up check
-            const xpForNextLevel = data.level * 100;
-            if (data.xp >= xpForNextLevel) {
-                data.xp -= xpForNextLevel;
-                data.level += 1;
-                showToast(`🎉 升级了！现在是 Lv.${data.level}！`);
-            } else {
-                showToast('🔥 主线通关！+10 XP！');
-            }
-
-            saveData(data);
-            renderHUD();
-            renderCalendar();
-        }
-
-        // ========== LOTTERY SYSTEM ==========
-        function checkLotteryAvailable() {
-            const data = getData();
-            const today = new Date();
-            const weekNum = getWeekNumber(today);
-
-            // Check if already claimed this week
-            if (data.lotteryClaimedWeek === weekNum) {
-                document.getElementById('lotteryAvailable').classList.remove('show');
-                document.getElementById('lotteryLocked').innerHTML = `
-                    <div style="font-size: 40px;">✅</div>
-                    <div style="color: var(--accent-green); margin-top: 8px;">
-                        本周奖励已领取！继续保持！
-                    </div>
-                `;
-                return;
-            }
-
-            if (data.streak >= 7) {
-                document.getElementById('lotteryAvailable').classList.add('show');
-                document.getElementById('lotteryLocked').style.display = 'none';
-            } else {
-                document.getElementById('lotteryAvailable').classList.remove('show');
-                document.getElementById('lotteryLocked').style.display = 'block';
-                document.getElementById('daysToLottery').textContent = 7 - data.streak;
-            }
-        }
-
-        function getWeekNumber(date) {
-            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-            const dayNum = d.getUTCDay() || 7;
-            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-        }
-
-        function openLottery() {
-            const modal = document.getElementById('lotteryModal');
-            modal.classList.add('show');
-
-            // Animate chest
-            setTimeout(() => {
-                const data = getData();
-                const rewards = data.rewards.length > 0 ? data.rewards : DEFAULT_REWARDS;
-                const reward = rewards[Math.floor(Math.random() * rewards.length)];
-
-                document.getElementById('chestOpening').style.display = 'none';
-                document.getElementById('rewardReveal').classList.add('show');
-                document.getElementById('rewardEmoji').textContent = reward.emoji;
-                document.getElementById('rewardText').textContent = reward.text;
-
-                // Create confetti
-                createConfetti();
-
-                // Mark as claimed
-                data.lotteryClaimedWeek = getWeekNumber(new Date());
-                saveData(data);
-            }, 2000);
-        }
-
-        function closeLottery() {
-            const modal = document.getElementById('lotteryModal');
-            modal.classList.remove('show');
-            document.getElementById('chestOpening').style.display = 'block';
-            document.getElementById('rewardReveal').classList.remove('show');
-            checkLotteryAvailable();
-        }
-
-        function createConfetti() {
-            const emojis = ['🎉', '✨', '🌟', '💫', '🎊', '⭐'];
-            for (let i = 0; i < 30; i++) {
-                setTimeout(() => {
-                    const confetti = document.createElement('div');
-                    confetti.className = 'confetti';
-                    confetti.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-                    confetti.style.left = Math.random() * 100 + 'vw';
-                    confetti.style.animationDuration = (2 + Math.random() * 2) + 's';
-                    document.body.appendChild(confetti);
-                    setTimeout(() => confetti.remove(), 4000);
-                }, i * 100);
-            }
-        }
-
-        // ========== REWARDS MANAGEMENT ==========
-        function renderRewardsList() {
-            const data = getData();
-            const rewards = data.rewards.length > 0 ? data.rewards : DEFAULT_REWARDS;
-            const container = document.getElementById('rewardsList');
-
-            container.innerHTML = rewards.map((r, i) => `
-                <div class="reward-item">
-                    <span>${r.emoji} ${r.text}</span>
-                    <button class="reward-delete" onclick="deleteReward(${i})">删除</button>
-                </div>
-            `).join('');
-        }
-
-        function addReward() {
-            const emoji = document.getElementById('newRewardEmoji').value.trim() || '🎁';
-            const text = document.getElementById('newRewardText').value.trim();
-
-            if (!text) {
-                showToast('请输入奖励内容');
-                return;
-            }
-
-            const data = getData();
-            if (!data.rewards) data.rewards = [...DEFAULT_REWARDS];
-            data.rewards.push({ emoji, text });
-            saveData(data);
-
-            document.getElementById('newRewardEmoji').value = '';
-            document.getElementById('newRewardText').value = '';
-
-            renderRewardsList();
-            showToast('奖励已添加！');
-        }
-
-        function deleteReward(index) {
-            const data = getData();
-            if (!data.rewards) data.rewards = [...DEFAULT_REWARDS];
-            data.rewards.splice(index, 1);
-            saveData(data);
-            renderRewardsList();
-        }
-
-        // ========== RENDER FUNCTIONS ==========
-        function renderHUD() {
-            const data = getData();
-
-            // Date
-            const today = new Date();
-            const options = { weekday: 'long', month: 'long', day: 'numeric' };
-            document.getElementById('dateDisplay').textContent = today.toLocaleDateString('zh-CN', options);
-
-            // Streak
-            document.getElementById('streakCount').textContent = data.streak;
-
-            // Level & XP
-            document.getElementById('levelNum').textContent = data.level;
-            document.getElementById('currentXP').textContent = data.xp;
-            const xpForNext = data.level * 100;
-            document.getElementById('nextLevelXP').textContent = xpForNext;
-            document.getElementById('xpFill').style.width = (data.xp / xpForNext * 100) + '%';
-
-            checkLotteryAvailable();
-        }
-
-        function renderTodayEmojis() {
-            const data = getData();
-            const today = getToday();
-            const container = document.getElementById('todayEmojis');
-
-            const todayData = data.days[today];
-            if (!todayData || !todayData.emojis || todayData.emojis.length === 0) {
-                container.innerHTML = '<div class="empty-state">今天还没有记录~</div>';
-                document.getElementById('emojiCount').textContent = '0 个';
-                return;
-            }
-
-            container.innerHTML = todayData.emojis.map(e =>
-                `<span class="today-emoji">${e.emoji}</span>`
-            ).join('');
-
-            document.getElementById('emojiCount').textContent = todayData.emojis.length + ' 个';
-        }
-
-        function renderCalendar() {
-            const data = getData();
-            const container = document.getElementById('weeklyCalendar');
-            const today = new Date();
-            const dayOfWeek = today.getDay();
-
-            // Get start of week (Monday)
-            const startOfWeek = new Date(today);
-            startOfWeek.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-
-            const days = ['一', '二', '三', '四', '五', '六', '日'];
-            let html = '';
-
-            for (let i = 0; i < 7; i++) {
-                const date = new Date(startOfWeek);
-                date.setDate(startOfWeek.getDate() + i);
-                const dateStr = date.toISOString().split('T')[0];
-                const dayData = data.days[dateStr];
-
-                const isToday = dateStr === getToday();
-                const hasMain = dayData && dayData.mainComplete;
-
-                // Get top 2 emojis by priority
-                let topEmojis = '';
-                if (dayData && dayData.emojis && dayData.emojis.length > 0) {
-                    const sorted = [...dayData.emojis].sort((a, b) => b.priority - a.priority);
-                    topEmojis = sorted.slice(0, 2).map(e => e.emoji).join('');
-                }
-
-                html += `
-                    <div class="calendar-day ${isToday ? 'today' : ''} ${hasMain ? 'has-main' : ''}">
-                        <div class="day-name">${days[i]}</div>
-                        <div class="day-date">${date.getDate()}</div>
-                        <div class="day-emojis">${topEmojis || '-'}</div>
-                    </div>
-                `;
-            }
-
-            container.innerHTML = html;
-        }
-
-        // ========== SETTINGS ==========
-        function toggleSettings() {
-            document.getElementById('settingsPanel').classList.toggle('show');
-        }
-
-        function resetToday() {
-            if (!confirm('确定要重置今天的数据吗？')) return;
-
-            const data = getData();
-            const today = getToday();
-            delete data.days[today];
-
-            // Recalculate streak
-            if (data.lastActiveDate === today) {
-                data.lastActiveDate = getYesterday();
-                data.streak = Math.max(0, data.streak - 1);
-            }
-
-            saveData(data);
-            renderAll();
-            showToast('今日数据已重置');
-        }
-
-        function exportData() {
-            const data = getData();
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `battleboard-backup-${getToday()}.json`;
-            a.click();
-            showToast('数据已导出');
-        }
-
-        function importData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    saveData(data);
-                    renderAll();
-                    showToast('数据已导入');
-                } catch (err) {
-                    showToast('导入失败：文件格式错误');
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        // ========== LOAD SAVED QUESTIONS ==========
-        function loadSavedQuestions() {
-            const data = getData();
-            const today = getToday();
-            const todayData = data.days[today];
-
-            if (todayData && todayData.questions) {
-                document.getElementById('q1').value = todayData.questions.q1 || '';
-                document.getElementById('q2').value = todayData.questions.q2 || '';
-                document.getElementById('q3').value = todayData.questions.q3 || '';
-            }
-        }
-
-        // ========== INIT ==========
-        function renderAll() {
-            renderHUD();
-            renderTodayEmojis();
-            renderCalendar();
-            renderRewardsList();
-            loadSavedQuestions();
-        }
-
-        // Initialize on load
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check for day change and update streak
-            const data = getData();
-            const today = getToday();
-            const yesterday = getYesterday();
-
-            // If last active was before yesterday, streak is broken
-            if (data.lastActiveDate && data.lastActiveDate !== today && data.lastActiveDate !== yesterday) {
-                data.streak = 0;
-                saveData(data);
-            }
-
-            renderAll();
+      }
+      return meta;
+    }
+
+    function init() {
+      const data = loadToday();
+      let meta = loadMeta();
+      meta = ensureDefaultPrizePool(meta);
+      saveMeta(meta);
+
+      document
+        .querySelectorAll('input[type="checkbox"][data-key]')
+        .forEach((cb) => {
+          const key = cb.getAttribute("data-key");
+          cb.checked = !!data[key];
+          cb.addEventListener("change", () => {
+            saveToday({ [key]: cb.checked });
+          });
         });
 
-        // Close settings when clicking outside
-        document.addEventListener('click', function(e) {
-            const panel = document.getElementById('settingsPanel');
-            const toggle = document.querySelector('.settings-toggle');
-            if (!panel.contains(e.target) && !toggle.contains(e.target)) {
-                panel.classList.remove('show');
-            }
+      const map = {
+        research_plan: "research_plan",
+        quant_plan: "quant_plan",
+        media_ideas: "media_ideas",
+        review_notes: "review_notes",
+      };
+      Object.entries(map).forEach(([id, key]) => {
+        const el = document.getElementById(id);
+        el.value = data[key] || "";
+        el.addEventListener("input", () => {
+          saveToday({ [key]: el.value });
         });
+      });
 
-        // Register service worker for PWA
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').catch(() => {});
+      updateMetaUI();
+      updateProgress();
+      updateTodayEmojis();
+      initPrizePoolUI();
+      updateWeeklyView();
+      updateLotteryUI();
+    }
+
+    function updateMetaUI() {
+      const meta = loadMeta();
+      const xp = meta.xp || 0;
+      const streak = meta.streak || 0;
+      const level = Math.floor(xp / 100) + 1;
+      const xpInLevel = xp % 100;
+      const xpPercent = Math.min(100, (xpInLevel / 100) * 100);
+
+      streakBadge.textContent = `连胜：${streak} 天 🔥`;
+      levelBadge.textContent = `Lv.${level} · ${xp} XP`;
+      xpFill.style.width = xpPercent + "%";
+
+      metaText.textContent =
+        "你在练的是「今天有没有给自己一点肯定」，而不是「有没有完美」。只要还在回来，你就在赢。";
+    }
+
+    function updateProgress() {
+      const checkboxes = Array.from(
+        document.querySelectorAll('input[type="checkbox"][data-key]')
+      );
+      const total = checkboxes.length;
+      const done = checkboxes.filter((cb) => cb.checked).length;
+      const percent = total ? Math.round((done / total) * 100) : 0;
+      progressText.textContent = `今日勾选项：${done}/${total}（约 ${percent}% ）`;
+    }
+
+    function updateTodayEmojis() {
+      const data = loadToday();
+      const emojis = data.emojis || [];
+      todayEmojisEl.textContent = emojis.join(" ");
+    }
+
+    function registerFirstEmojiIfNeeded() {
+      const data = loadToday();
+      if (data._emojiRegisteredForStreak) return;
+
+      const meta = loadMeta();
+      const todayDate = new Date(todayKey);
+
+      if (!meta.lastEmojiDate) {
+        meta.streak = 1;
+      } else {
+        const last = new Date(meta.lastEmojiDate);
+        const diffDays = Math.round(
+          (todayDate - last) / (1000 * 60 * 60 * 24)
+        );
+        if (diffDays === 1) {
+          meta.streak = (meta.streak || 0) + 1;
+        } else {
+          meta.streak = 1;
         }
-    </script>
+      }
+      meta.lastEmojiDate = todayKey;
+      saveMeta(meta);
+
+      saveToday({ _emojiRegisteredForStreak: true });
+      updateMetaUI();
+      updateLotteryUI();
+    }
+
+    function addEmoji() {
+      const input = prompt("输入你想记录的 emoji（可以是一个或一串，例如：🌱 或 🌱✨）：");
+      if (!input) return;
+      const trimmed = input.trim();
+      if (!trimmed) return;
+
+      const data = loadToday();
+      const emojis = data.emojis || [];
+      emojis.push(trimmed);
+      saveToday({ emojis });
+
+      registerFirstEmojiIfNeeded();
+    }
+
+    function markMainQuest() {
+      const data = loadToday();
+      if (data.mainCleared) {
+        alert("今天已经标记主线通关啦，可以多加 emoji 夸自己。");
+        return;
+      }
+      const meta = loadMeta();
+      meta.xp = (meta.xp || 0) + 10;
+      meta.lastWinDate = todayKey;
+      saveMeta(meta);
+
+      const emojis = data.emojis || [];
+      emojis.unshift("🔥");
+      saveToday({ mainCleared: true, emojis });
+
+      alert("主线通关 ✅ 已获得 10 XP，并自动加上 🔥 emoji！");
+      updateMetaUI();
+    }
+
+    function updateWeeklyView() {
+      const all = loadAll();
+      const days = [];
+      const todayDate = new Date(todayKey);
+
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(todayDate);
+        d.setDate(d.getDate() - i);
+        const key = d.toISOString().slice(0, 10);
+        const w = d.getDay();
+        const weekChar = ["日", "一", "二", "三", "四", "五", "六"][w];
+        const dayData = all[key] || {};
+        const emojis = dayData.emojis || [];
+        days.push({
+          key,
+          weekChar,
+          emojis,
+        });
+      }
+
+      weeklyGrid.innerHTML = "";
+      let nonEmpty = 0;
+      days.forEach((day) => {
+        if (day.emojis.length > 0) nonEmpty++;
+        const div = document.createElement("div");
+        div.className = "day-cell";
+
+        const box = document.createElement("div");
+        box.className = "day-box";
+        if (day.emojis.length > 0) {
+          box.classList.add("win");
+        }
+
+        const topTwo = day.emojis.slice(0, 2);
+        if (topTwo.length === 0) {
+          const line = document.createElement("div");
+          line.className = "day-emoji-line";
+          line.textContent = "·";
+          box.appendChild(line);
+        } else {
+          topTwo.forEach((e) => {
+            const line = document.createElement("div");
+            line.className = "day-emoji-line";
+            line.textContent = e;
+            box.appendChild(line);
+          });
+        }
+
+        div.appendChild(box);
+        const label = document.createElement("div");
+        label.textContent = "周" + day.weekChar;
+        div.appendChild(label);
+
+        weeklyGrid.appendChild(div);
+      });
+      weekSummaryText.textContent = `最近 7 天中，有 emoji 的天数：${nonEmpty}/7`;
+    }
+
+    function initPrizePoolUI() {
+      const meta = loadMeta();
+      const lines = (meta.prizePool || []).join("\n");
+      prizePoolInput.value = lines;
+
+      prizePoolInput.addEventListener("input", () => {
+        const text = prizePoolInput.value || "";
+        const arr = text
+          .split("\n")
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0);
+        const m = loadMeta();
+        m.prizePool = arr;
+        saveMeta(m);
+        updateLotteryUI();
+      });
+
+      if (meta.lastPrizeResult) {
+        lotteryResult.textContent = "上次大奖：";
+        lotteryPrize.textContent = meta.lastPrizeResult;
+      }
+    }
+
+    function updateLotteryUI() {
+      const meta = ensureDefaultPrizePool(loadMeta());
+      saveMeta(meta);
+      const streak = meta.streak || 0;
+      const pool = meta.prizePool || [];
+      const totalDraws = meta.totalDraws || 0;
+      const eligibleDraws = Math.floor(streak / 7);
+      const remainingDraws = Math.max(0, eligibleDraws - totalDraws);
+
+      if (!pool.length) {
+        lotteryStatus.textContent = "奖池为空，请先添加奖励。";
+        lotteryBtn.disabled = true;
+        lotteryBtn.textContent = "宝箱未解锁";
+        return;
+      }
+
+      if (remainingDraws > 0) {
+        lotteryStatus.textContent = `当前 streak：${streak} 天，可抽奖次数：${remainingDraws} 次`;
+        lotteryBtn.disabled = false;
+        lotteryBtn.textContent = "✨ 抽取本周奖励";
+      } else {
+        if (streak < 7) {
+          const need = 7 - streak;
+          lotteryStatus.textContent = `当前 streak：${streak} 天，再坚持 ${need} 天就能解锁宝箱。`;
+        } else {
+          lotteryStatus.textContent = `当前 streak：${streak} 天，本轮奖励已抽完，继续攒可以解锁更多次。`;
+        }
+        lotteryBtn.disabled = true;
+        lotteryBtn.textContent = "宝箱未解锁";
+      }
+    }
+
+    function runLottery() {
+      let meta = ensureDefaultPrizePool(loadMeta());
+      const streak = meta.streak || 0;
+      const pool = meta.prizePool || [];
+      if (!pool.length) {
+        alert("奖池为空，先在下方添加几条奖励吧。");
+        return;
+      }
+      const totalDraws = meta.totalDraws || 0;
+      const eligibleDraws = Math.floor(streak / 7);
+      const remainingDraws = Math.max(0, eligibleDraws - totalDraws);
+      if (remainingDraws <= 0) {
+        alert("本轮可抽奖次数已用完，继续攒 streak 吧。");
+        return;
+      }
+
+      lotteryBtn.disabled = true;
+      lotteryBtn.textContent = "抽奖中…";
+      lotteryResult.textContent = "宝箱正在摇晃中…";
+      lotteryPrize.textContent = "";
+
+      let count = 0;
+      const duration = 1200;
+      const interval = 80;
+      const maxCount = Math.floor(duration / interval);
+      const timer = setInterval(() => {
+        const randomPrize = pool[Math.floor(Math.random() * pool.length)];
+        lotteryPrize.textContent = randomPrize;
+        count++;
+        if (count >= maxCount) {
+          clearInterval(timer);
+          const finalPrize = pool[Math.floor(Math.random() * pool.length)];
+          lotteryPrize.textContent = finalPrize;
+          lotteryResult.textContent = "本周奖励抽到：";
+          meta = loadMeta();
+          meta.lastPrizeResult = finalPrize;
+          meta.totalDraws = (meta.totalDraws || 0) + 1;
+          saveMeta(meta);
+          updateLotteryUI();
+        }
+      }, interval);
+    }
+
+    resetBtn.addEventListener("click", () => {
+      if (!confirm("确定要重置今天所有勾选、文字和 emoji 吗？")) return;
+      const all = loadAll();
+      all[todayKey] = {};
+      saveAll(all);
+      init();
+    });
+
+    addEmojiBtn.addEventListener("click", addEmoji);
+    mainQuestBtn.addEventListener("click", markMainQuest);
+    lotteryBtn.addEventListener("click", runLottery);
+
+    copyBtn.addEventListener("click", async () => {
+      const data = loadToday();
+      const meta = loadMeta();
+      const emojis = data.emojis || [];
+      const lines = [];
+      lines.push(`【三线战斗战报｜${todayKey}】`);
+      lines.push("");
+      lines.push(`连胜：${meta.streak || 0} 天｜总 XP：${meta.xp || 0}`);
+      lines.push(`今日 emoji：${emojis.length ? emojis.join(" ") : "（无）"}`);
+      lines.push("");
+      lines.push("一、科研");
+      lines.push(`- 今日计划：${data.research_plan || "（未填写）"}`);
+      lines.push(
+        `- 深度工作：块1 ${data.research_block1 ? "✅" : "❌"}｜块2 ${
+          data.research_block2 ? "✅" : "❌"
+        }｜总结：${data.research_summary ? "已写" : "未写"}`
+      );
+      lines.push("");
+      lines.push("二、量化（本周为准备周）");
+      lines.push(
+        `- 准备动作：问题整理 ${data.quant_prepare ? "✅" : "❌"}｜随手记录：${
+          data.quant_note ? "✅" : "❌"
+        }`
+      );
+      lines.push(`- 记录：${data.quant_plan || "（未填写）"}`);
+      lines.push("");
+      lines.push("三、自媒体 / 输出");
+      lines.push(
+        `- 选题脑暴：${data.media_brainstorm ? "✅" : "❌"}｜创作动作：${
+          data.media_create ? "✅" : "❌"
+        }`
+      );
+      lines.push(`- 选题 / 记录：${data.media_ideas || "（未填写）"}`);
+      lines.push("");
+      lines.push("四、晚间 3 问记录");
+      lines.push(data.review_notes || "（未填写）");
+
+      const text = lines.join("\n");
+
+      try {
+        await navigator.clipboard.writeText(text);
+        alert("已复制到剪贴板，可以贴到日记 / Notion 里。");
+      } catch (e) {
+        alert("复制失败，可以手动全选复制。");
+      }
+    });
+
+    init();
+  </script>
 </body>
 </html>
