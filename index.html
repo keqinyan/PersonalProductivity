@@ -365,6 +365,10 @@
       <input type="checkbox" data-key="quant_note" />
       <span>随手写一句对最近市场 / 策略的观察。</span>
     </label>
+    <label>
+      <input type="checkbox" data-key="quant_study" />
+      <span>学习 Pine Script / TradingView / 策略调试（60–90min）</span>
+    </label>
     <h3>量化相关随手记录</h3>
     <textarea id="quant_plan" placeholder="例如：想问的问题、标的选择、风险偏好、策略方向……"></textarea>
   </div>
@@ -448,7 +452,15 @@
   </div>
 
   <script>
-    const todayKey = new Date().toISOString().slice(0, 10);
+    // 凌晨5点前算作前一天
+    function getEffectiveDate() {
+      const now = new Date();
+      if (now.getHours() < 5) {
+        now.setDate(now.getDate() - 1);
+      }
+      return now.toISOString().slice(0, 10);
+    }
+    const todayKey = getEffectiveDate();
     const STORAGE_KEY = "three_line_warboard_v3";
     const META_KEY = "three_line_meta_v3";
 
@@ -472,6 +484,9 @@
 
     (function setDate() {
       const d = new Date();
+      if (d.getHours() < 5) {
+        d.setDate(d.getDate() - 1);
+      }
       const week = ["日", "一", "二", "三", "四", "五", "六"][d.getDay()];
       todayEl.textContent = `今天：${todayKey}（周${week}）`;
     })();
@@ -885,7 +900,7 @@
       lines.push(
         `- 问题整理：${data.quant_prepare ? "✅" : "❌"}｜市场观察：${
           data.quant_note ? "✅" : "❌"
-        }`
+        }｜Pine Script学习：${data.quant_study ? "✅" : "❌"}`
       );
       lines.push(`- 记录：${data.quant_plan || "（未填写）"}`);
       lines.push("");
